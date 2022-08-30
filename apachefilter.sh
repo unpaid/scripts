@@ -11,9 +11,10 @@ USER_AGENT='.'
 KEEP_QUERY=0
 THRESHOLD=0
 LOGS='/home/*/access-logs/*'
+RAW_OUTPUT=0
 
 # Parse arguments
-ARGS=$(getopt --options '' --longoptions "domain:,ip:,date:,method:,file:,status:,user-agent:,keep-query,threshold:" -- "$@")
+ARGS=$(getopt --options "r" --longoptions "domain:,ip:,date:,method:,file:,status:,user-agent:,keep-query,threshold:,raw" -- "$@")
 if [[ $? -gt 0 ]]; then
 	exit 1
 fi
@@ -29,13 +30,14 @@ while true; do
 	--user-agent) USER_AGENT="$2" ;;
 	--keep-query) KEEP_QUERY=1    ;;
 	--threshold)  THRESHOLD="$2"  ;;
+	-r|--raw)     RAW_OUTPUT=1    ;;
 	# End of 'getopt'
 	--) break ;;
 	esac
 	shift
 done
 
-for LOG in $LOGS
+OUTPUT=$(for LOG in $LOGS
 do
 	if [[ $LOG != *$DOMAIN* ]]; then
 		continue
@@ -52,7 +54,7 @@ do
 	fi
 	
 	# Extract data from INPUT and format into pipe-separated OUTPUT
-	OUTPUT=$(echo "$INPUT" | sed 's/\/\///g' |
+	echo "$INPUT" | sed 's/\/\///g' |
 	awk -v OFS='|' -v FPAT='\\[[^]]*]|"[^"]*"|\\S+' -v IGNORECASE=1 -v ip=$IP -v date=$DATE -v method=$METHOD -v file=$FILE -v status=$STATUS -v ua=$USER_AGENT -v url=$URL -v kq=$KEEP_QUERY '{
 		split($4, arrDateTime, " ");
 		split(arrDateTime[1], arrDate, ":");
@@ -66,10 +68,13 @@ do
 			else
 				print $1,arrDate[1],arrRequest[1],url outFile,$6,$9;
 		}
-	}')
-	if [[ -n $OUTPUT ]]; then
-		echo "$OUTPUT" | sed 's/\[//' | sed 's/"//'
-	fi
-done | awk -F '|' '{ print $1,$3,$5,$4 }' |
-sort | uniq -c | awk -v threshold=$THRESHOLD '$1 >= threshold' |
-(echo "Count IP Method Status URL"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; fi) | column -t;
+	}' | sed 's/\[//' | sed 's/"//'
+done)
+
+if [[ RAW_OUTPUT -gt 0 ]]; then
+	echo "$OUTPUT"
+else
+	echo "$OUTPUT" | awk -F '|' '{ print $1,$3,$5,$4 }' |
+	sort | uniq -c | awk -v threshold=$THRESHOLD '$1 >= threshold' |
+	(echo "Count IP Method Status URL"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; fi) | column -t;
+fi

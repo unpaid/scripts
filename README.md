@@ -14,12 +14,13 @@ Command line options are as follows:
 [--user-agent] <User-Agent>         (Filter by User-Agent)
 [--keep-query]                      (Keep URL query parameters in output)
 [--threshold] <count>               (Filter output by number of requests)
+[-r|--raw]                          (Output to stdout after filtering but before any formatting or sorting)
 ```
 
 ##### Example Usage
 Filter output to requests equal to or above 10 on today's date with a method of 'POST' and a status code of '200' to either 'xmlrpc' or 'wp-login':
 ```
-./apachefilter.sh --date $(date '+%d/%b/%Y') --method POST --file xmlrpc|wp-login --status 200 --threshold 10
+./apachefilter.sh --date $(date '+%d/%b/%Y') --method POST --file 'xmlrpc|wp-login' --status 200 --threshold 10
 ```
 
 Filter output by requests from Google's 66.249.64.0/19 netblock:
@@ -32,12 +33,18 @@ Filter output by all '404' status codes from Googlebot this month:
 ./apachefilter.sh --date $(date '+%b/%Y') --status 404 --user-agent 'Googlebot'
 ```
 
+Count total amount of requests to 'domain.com' on the 21st of September 2022:
+```
+./apachefilter.sh --domain 'domain.com' --date '21/09/2022' --raw | wc -l
+```
+
 ##### Notes
 - Checks for all access logs under `/home/*/access-logs/*`
 - Relies on a specific Apache access log format
-- Output is strictly in the following format: `Count, IP Address, Method, Status Code, URL`
+- When the `--raw` flag is present, the output will be in the following format: `IP Address|Date|Method|URL|Status Code|User-Agent`
+- When the `--raw` flag is absent, the output will be in the following format: `Count, IP Address, Method, Status Code, URL`
 - Output is sorted by amount of requests
-- Output is limited to the 20 highest requests made
+- Output is limited to the 20 highest requests made when `--threshold` isn't specified
 - File filtering is applied to the full filepath, regardless of if `--keep-query` is false or not
 - Probably horribly inefficient for investigating high load in real-time
 - No "help" function
