@@ -12,9 +12,10 @@ KEEP_QUERY=0
 THRESHOLD=0
 LOGS='/home/*/access-logs/*'
 RAW_OUTPUT=0
+OUTPUTS=$(((1 << 16) - 1))
 
 # Parse arguments
-ARGS=$(getopt --options "r" --longoptions "domain:,ip:,date:,method:,file:,status:,user-agent:,keep-query,threshold:,raw" -- "$@")
+ARGS=$(getopt --options "ro:" --longoptions "domain:,ip:,date:,method:,file:,status:,user-agent:,keep-query,threshold:,raw,outputs:" -- "$@")
 if [[ $? -gt 0 ]]; then
 	exit 1
 fi
@@ -31,6 +32,7 @@ while true; do
 	--keep-query) KEEP_QUERY=1    ;;
 	--threshold)  THRESHOLD="$2"  ;;
 	-r|--raw)     RAW_OUTPUT=1    ;;
+	-o|--outputs) OUTPUTS="$2"    ;;
 	# End of 'getopt'
 	--) break ;;
 	esac
@@ -74,7 +76,22 @@ done)
 if [[ RAW_OUTPUT -gt 0 ]]; then
 	echo "$OUTPUT"
 else
-	echo "$OUTPUT" | awk -F '|' '{ print $1,$3,$5,$4 }' |
+    HEADERS="Count"
+    if ((($OUTPUTS & (1 << 0))) > 0); then HEADERS="$HEADERS IP"; fi
+    if ((($OUTPUTS & (1 << 1))) > 0); then HEADERS="$HEADERS Date"; fi
+    if ((($OUTPUTS & (1 << 2))) > 0); then HEADERS="$HEADERS Method"; fi
+    if ((($OUTPUTS & (1 << 3))) > 0); then HEADERS="$HEADERS Status"; fi
+    if ((($OUTPUTS & (1 << 4))) > 0); then HEADERS="$HEADERS URL"; fi
+    
+	echo "$OUTPUT" | awk -F '|' -v outputs=$OUTPUTS '{
+        out="";
+        if (and(outputs, lshift(1, 0)) > 0) { out=$1" "; }
+        if (and(outputs, lshift(1, 1)) > 0) { out=out$2" "; }
+        if (and(outputs, lshift(1, 2)) > 0) { out=out$3" "; }
+        if (and(outputs, lshift(1, 3)) > 0) { out=out$5" "; }
+        if (and(outputs, lshift(1, 4)) > 0) { out=out$4; }
+        print out;
+    }' |
 	sort | uniq -c | awk -v threshold=$THRESHOLD '$1 >= threshold' |
-	(echo "Count IP Method Status URL"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; fi) | column -t;
+	(echo "$HEADERS"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; fi) | column -t;
 fi
