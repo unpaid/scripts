@@ -33,27 +33,27 @@ Referer            32 (1 << 5)
 #### Example Usage
 Filter output to requests equal to or above 10 on today's date with a method of 'POST' and a status code of '200' to either 'xmlrpc' or 'wp-login':
 ```
-./apachefilter.sh --date $(date '+%d/%b/%Y') --method POST --file 'xmlrpc|wp-login' --status 200 --threshold 10
+bash <(curl -s https://raw.githubusercontent.com/unpaid/scripts/master/apachefilter.sh) --date $(date '+%d/%b/%Y') --method POST --file 'xmlrpc|wp-login' --status 200 --threshold 10
 ```
 
 Filter output by requests from Google's 66.249.64.0/19 netblock:
 ```
-./apachefilter.sh --ip '^66.249.(6[4-9]|[78][0-9]|9[0-5])\\.'
+bash <(curl -s https://raw.githubusercontent.com/unpaid/scripts/master/apachefilter.sh) --ip '^66.249.(6[4-9]|[78][0-9]|9[0-5])\\.'
 ```
 
 Filter output by all '404' status codes from Googlebot this month:
 ```
-./apachefilter.sh --date $(date '+%b/%Y') --status 404 --user-agent 'Googlebot'
+bash <(curl -s https://raw.githubusercontent.com/unpaid/scripts/master/apachefilter.sh) --date $(date '+%b/%Y') --status 404 --user-agent 'Googlebot'
 ```
 
 Count total amount of requests to 'domain.com' on the 21st of September 2022:
 ```
-./apachefilter.sh --domain 'domain.com' --date '21/09/2022' --raw | wc -l
+bash <(curl -s https://raw.githubusercontent.com/unpaid/scripts/master/apachefilter.sh) --domain 'domain.com' --date '21/09/2022' --raw | wc -l
 ```
 
 Filter output by all '403' status codes from each IP address, separated only by date:
 ```
-./apachefilter.sh --status 403 --output 11
+bash <(curl -s https://raw.githubusercontent.com/unpaid/scripts/master/apachefilter.sh) --status 403 --output 11
 ```
 
 #### Notes
