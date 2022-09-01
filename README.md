@@ -11,6 +11,7 @@ Command line options are as follows:
 [--method] <HTTP verb>              (Filter by request method)
 [--file] <path>                     (Filter by requested resource)
 [--status] <code>                   (Filter by response status code)
+[--referer|--referrer] <referer>    (Filter by Referer)
 [--user-agent] <User-Agent>         (Filter by User-Agent)
 [--keep-query]                      (Keep URL query parameters in output)
 [--threshold] <count>               (Filter output by number of requests)
@@ -26,6 +27,7 @@ Date               2  (1 << 1)
 Request Method     4  (1 << 2)
 Status Code        8  (1 << 3)
 URL                16 (1 << 4)
+Referer            32 (1 << 5)
 ```
 
 #### Example Usage
@@ -57,8 +59,8 @@ Filter output by all '403' status codes from each IP address, separated only by 
 #### Notes
 - Checks for all access logs under `/home/*/access-logs/*`
 - Relies on a specific Apache access log format
-- When the `--raw` flag is present, the output will be in the following format: `IP Address|Date|Method|URL|Status Code|User-Agent`
-- When the `--raw` flag and `--outputs` option is absent, the output will be in the following format: `Count, IP Address, Date, Method, Status Code, URL`
+- When the `--raw` flag is present, the output will be in the following format: `IP Address|Date|Method|Status Code|URL|Referer|User-Agent`
+- When the `--raw` flag and `--outputs` option is absent, the output will be in the following format: `Count, IP Address, Date, Method, Status Code, URL, Referer`
 - Output is sorted by amount of requests
 - Output is limited to the 20 highest requests made when `--threshold` isn't specified
 - File filtering is applied to the full filepath, regardless of if `--keep-query` is false or not
