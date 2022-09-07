@@ -97,5 +97,5 @@ else
         print out;
     }' |
 	sort | uniq -c | awk -v threshold=$THRESHOLD '$1 >= threshold' |
-	(echo "$HEADERS"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; fi) | column -t;
+	(echo "$HEADERS"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; else cat; fi) | column -t;
 fi
