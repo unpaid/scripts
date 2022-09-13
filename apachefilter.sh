@@ -71,7 +71,7 @@ do
 			gsub("/+", "/", outFile);
 			print $1,arrDate[1],arrRequest[1],$6,url outFile,$8,$9;
 		}
-	}' | sed 's/\[//' | sed 's/"//'
+	}' | sed 's/\[//g; s/"//g'
 done)
 
 if [[ RAW_OUTPUT -gt 0 ]]; then
