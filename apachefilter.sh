@@ -58,7 +58,7 @@ do
 	fi
 	
 	# Extract data from INPUT and format into pipe-separated OUTPUT
-	echo "$INPUT" | sed 's/\/\///g' |
+	echo "$INPUT" |
 	awk -v OFS='|' -v FPAT='\\[[^]]*]|"[^"]*"|\\S+' -v IGNORECASE=1 -v ip=$IP -v date=$DATE -v method=$METHOD -v file=$FILE -v status=$STATUS -v referer=$REFERER -v ua=$USER_AGENT -v url=$URL -v kq=$KEEP_QUERY '{
 		split($4, arrDateTime, " ");
 		split(arrDateTime[1], arrDate, ":");
@@ -67,6 +67,7 @@ do
 		if ($1 ~ ip && arrDateTime[1] ~ date && arrRequest[1] ~ method && arrRequest[2] ~ file && $6 ~ status && $8 ~ referer && $9 ~ ua) {
 			# IP|Date|Method|Status|URL|Referer|User-Agent
 			(kq) ? outFile = arrRequest[2] : outFile = arrFile[1];
+			gsub("/+", "/", outFile);
 			if (arrRequest[2] ~ /^https?:\/\//)
 				print $1,arrDate[1],arrRequest[1],$6,outFile,$8,$9;
 			else
