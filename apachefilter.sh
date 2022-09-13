@@ -63,15 +63,13 @@ do
 		split($4, arrDateTime, " ");
 		split(arrDateTime[1], arrDate, ":");
 		split($5, arrRequest, " ");
+		gsub("^https?:\\/\\/", "", arrRequest[2]);
 		split(arrRequest[2], arrFile, "\\?");
 		if ($1 ~ ip && arrDateTime[1] ~ date && arrRequest[1] ~ method && arrRequest[2] ~ file && $6 ~ status && $8 ~ referer && $9 ~ ua) {
 			# IP|Date|Method|Status|URL|Referer|User-Agent
 			(kq) ? outFile = arrRequest[2] : outFile = arrFile[1];
 			gsub("/+", "/", outFile);
-			if (arrRequest[2] ~ /^https?:\/\//)
-				print $1,arrDate[1],arrRequest[1],$6,outFile,$8,$9;
-			else
-				print $1,arrDate[1],arrRequest[1],$6,url outFile,$8,$9;
+			print $1,arrDate[1],arrRequest[1],$6,url outFile,$8,$9;
 		}
 	}' | sed 's/\[//' | sed 's/"//'
 done)
