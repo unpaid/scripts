@@ -48,7 +48,7 @@ do
 	fi
 
 	# Get Domain / URL
-	URL=$(ls $LOG | awk -F '/' '{ if ($NF ~ "ssl_log") print "https://"$NF; else print "http://"$NF }' | sed 's/-ssl_log//' | sed 's/-.*\.gz//')
+	URL=$(echo $LOG | awk -F '/' '{ if ($NF ~ "ssl_log") print "https://"$NF; else print "http://"$NF }' | sed 's/-ssl_log//; s/-.*\.gz//')
 
 	# Read LOG contents into INPUT variable
 	if [[ $LOG == *.gz ]]; then
