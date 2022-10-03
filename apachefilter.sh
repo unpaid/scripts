@@ -85,16 +85,15 @@ else
     if ((($OUTPUTS & (1 << 4))) > 0); then HEADERS="$HEADERS URL"; fi
     if ((($OUTPUTS & (1 << 5))) > 0); then HEADERS="$HEADERS Referer"; fi
     
-	echo "$OUTPUT" | awk -F '|' -v outputs=$OUTPUTS '{
-        out="";
-        if (and(outputs, lshift(1, 0)) > 0) { out=$1" "; }
-        if (and(outputs, lshift(1, 1)) > 0) { out=out$2" "; }
-        if (and(outputs, lshift(1, 2)) > 0) { out=out$3" "; }
-        if (and(outputs, lshift(1, 3)) > 0) { out=out$4" "; }
-        if (and(outputs, lshift(1, 4)) > 0) { out=out$5" "; }
-        if (and(outputs, lshift(1, 5)) > 0) { out=out$6; }
-        print out;
-    }' |
-	sort | uniq -c | awk -v threshold=$THRESHOLD '$1 >= threshold' |
-	(echo "$HEADERS"; sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; else cat; fi) | column -t;
+    { echo "$HEADERS"; echo "$OUTPUT" | awk -F '|' -v outputs=$OUTPUTS '{
+            out="";
+            if (and(outputs, lshift(1, 0)) > 0) { out=$1" "; }
+            if (and(outputs, lshift(1, 1)) > 0) { out=out$2" "; }
+            if (and(outputs, lshift(1, 2)) > 0) { out=out$3" "; }
+            if (and(outputs, lshift(1, 3)) > 0) { out=out$4" "; }
+            if (and(outputs, lshift(1, 4)) > 0) { out=out$5" "; }
+            if (and(outputs, lshift(1, 5)) > 0) { out=out$6; }
+            print out;
+        }' | sort | uniq -c | awk -v threshold=$THRESHOLD '$1 >= threshold' | sort -h | if [[ $THRESHOLD -lt 1 ]]; then tail -n 20; else cat; fi
+    } | column -t
 fi
