@@ -11,7 +11,7 @@ REFERER='.'
 
 KEEP_QUERY=0
 THRESHOLD=0
-LOGS='/home/*/access-logs/*'
+LOGS='/home/*/access-logs/* /home/*/logs/*'
 RAW_OUTPUT=0
 OUTPUTS=$(((1 << 16) - 1))
 
